@@ -4,7 +4,7 @@
   <title><![CDATA[lixin notebook]]></title>
   <link href="http://lixin0111.github.io/atom.xml" rel="self"/>
   <link href="http://lixin0111.github.io/"/>
-  <updated>2013-12-29T22:59:34+08:00</updated>
+  <updated>2014-01-01T23:29:34+08:00</updated>
   <id>http://lixin0111.github.io/</id>
   <author>
     <name><![CDATA[lixin]]></name>
@@ -12,5 +12,22 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[2014newbegin]]></title>
+    <link href="http://lixin0111.github.io/blog/2014/01/01/2014newbegin/"/>
+    <updated>2014-01-01T23:19:52+08:00</updated>
+    <id>http://lixin0111.github.io/blog/2014/01/01/2014newbegin</id>
+    <content type="html"><![CDATA[<p>今天注册了域名lixin.im；开始在这个博客上记录自己的生活点滴；
+希望也是对自己建立良好习惯的一个促进。
+2014年到来了，新年新气象，规划下新年想要有所突破的地方：
+1.更多地看书，linux环境高级编程以及NIO、actor相关书籍，在网络IO这方面一定要成为专家；
+2.建立良好的生活习惯，注意身体健康，减掉10斤赘肉；
+3.事业上有所突破，产品的规划、实施、推广都要做好，建立一个牛B的工程师团队；
+4.性格上急躁的脾气要该掉，照顾好老婆孩子。</p>
+
+<p>别的不多说了，向伞哥和tinyfool学习吧。</p>
+]]></content>
+  </entry>
   
 </feed>
