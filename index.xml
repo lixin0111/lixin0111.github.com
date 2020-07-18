@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>兵临城下</title>
-    <link>http://lix23.com/</link>
+    <link>https://www.lix23.com/</link>
     <description>Recent content on 兵临城下</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zn-cn</language>
     <lastBuildDate>Sat, 18 Jul 2020 08:06:48 +0800</lastBuildDate>
     
-	<atom:link href="http://lix23.com/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://www.lix23.com/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>第一篇帖子</title>
-      <link>http://lix23.com/posts/my-very-first-post/</link>
+      <link>https://www.lix23.com/posts/my-very-first-post/</link>
       <pubDate>Sat, 18 Jul 2020 08:06:48 +0800</pubDate>
       
-      <guid>http://lix23.com/posts/my-very-first-post/</guid>
+      <guid>https://www.lix23.com/posts/my-very-first-post/</guid>
       <description>从蝶园搬出来到溪望差不多第三周了吧，so far so good，感觉一切都在往好的方向发展，I think I need more time to shape myself,keep fighting:!!</description>
     </item>
     
