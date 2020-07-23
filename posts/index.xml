@@ -6,10 +6,19 @@
     <description>Recent content in Posts on 兵临城下</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zn-cn</language>
-    <lastBuildDate>Sat, 18 Jul 2020 08:06:48 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 23 Jul 2020 23:40:12 +0800</lastBuildDate>
     
 	<atom:link href="https://www.lix23.com/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Test Comments</title>
+      <link>https://www.lix23.com/posts/test-comments/</link>
+      <pubDate>Thu, 23 Jul 2020 23:40:12 +0800</pubDate>
+      
+      <guid>https://www.lix23.com/posts/test-comments/</guid>
+      <description>在这里进行一下gitcoment测试，希望可以功能一切正常。</description>
+    </item>
     
     <item>
       <title>第一篇帖子</title>
