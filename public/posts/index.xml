@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on 雪泥鸿爪</title>
+    <link>https://www.lix23.com/posts/</link>
+    <description>Recent content in Posts on 雪泥鸿爪</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>all copyright reserve for lixin</copyright>
+    <lastBuildDate>Fri, 25 Aug 2023 13:08:35 +0800</lastBuildDate><atom:link href="https://www.lix23.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title> 如何用hugo生成静态网站</title>
+      <link>https://www.lix23.com/posts/how-to-gen-website/</link>
+      <pubDate>Fri, 25 Aug 2023 13:08:35 +0800</pubDate>
+      
+      <guid>https://www.lix23.com/posts/how-to-gen-website/</guid>
+      <description>三年前使用hugo搭建了对应的静态blog网站，三年后花了点时间重新捡起来，在这里记录一下hugo使用步骤，也防止以后再忘记；
+安装 Hugo：首先，你需要在你的计算机上安装 Hugo。根据你的操作系统，安装方法可能会有所不同，我在mac上是通过brew install hugo来进行安装的； 创建网站：通过 hugo new site ${your_website_name} 来创建相关网站元目录； 根据个人需求来选择一个主题 比如diary主题 https://themes.gohugo.io/themes/hugo-theme-diary/ ，根据主题的配置样例来修改 hugo.toml 完成网站的个性化配置； 在元目录下执行如下命令来创建对应的博客帖子：hugo new posts/${post_name}.md ，用你喜欢的文件编辑器编辑相关帖子，使用 hugo server 命令来尝试在本地拉起这个网站，并可以通过浏览器来访问网站检查效果； 生成静态网站：当你添加了足够的内容后，在相应的目录下使用以下命令生成静态网站：hugo，这个命令会在 public 目录下生成生成静态网站，把生成的网站内容上传到github相应的repo下即可访问； </description>
+    </item>
+    
+    <item>
+      <title>第一篇帖子</title>
+      <link>https://www.lix23.com/posts/my-very-first-post/</link>
+      <pubDate>Sat, 18 Jul 2020 08:06:48 +0800</pubDate>
+      
+      <guid>https://www.lix23.com/posts/my-very-first-post/</guid>
+      <description>从蝶园搬出来到溪望差不多第三周了吧，so far so good，希望一切都在往好的方向发展，I think I need more time to shape myself, keep fighting!</description>
+    </item>
+    
+  </channel>
+</rss>
