@@ -2,13 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://www.lix23.com/posts/how-to-gen-website/</loc>
-    <lastmod>2023-08-25T13:08:35+08:00</lastmod>
+    <loc>https://www.lix23.com/posts/all-about-java-locks/</loc>
+    <lastmod>2023-09-08T00:01:07+08:00</lastmod>
   </url><url>
     <loc>https://www.lix23.com/posts/</loc>
-    <lastmod>2023-08-25T13:08:35+08:00</lastmod>
+    <lastmod>2023-09-08T00:01:07+08:00</lastmod>
   </url><url>
     <loc>https://www.lix23.com/</loc>
+    <lastmod>2023-09-08T00:01:07+08:00</lastmod>
+  </url><url>
+    <loc>https://www.lix23.com/posts/how-to-gen-website/</loc>
     <lastmod>2023-08-25T13:08:35+08:00</lastmod>
   </url><url>
     <loc>https://www.lix23.com/posts/my-very-first-post/</loc>
