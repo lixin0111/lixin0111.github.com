@@ -6,73 +6,10 @@
     <description>Recent content on 雪泥鸿爪</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <copyright>all copyright reserve for lixin</copyright>
-    <lastBuildDate>Fri, 08 Sep 2023 00:01:07 +0800</lastBuildDate>
+    <copyright>all copyright reserve for lixin xinli80@qq.com </copyright>
+    <lastBuildDate>Fri, 25 Aug 2023 13:08:35 +0800</lastBuildDate>
     
         <atom:link href="https://www.lix23.com/index.xml" rel="self" type="application/rss+xml" />
-    
-    
-    
-        <item>
-        <title>All About Java Locks</title>
-        <link>https://www.lix23.com/posts/all-about-java-locks/</link>
-        <pubDate>Fri, 08 Sep 2023 00:01:07 +0800</pubDate>
-        
-        <guid>https://www.lix23.com/posts/all-about-java-locks/</guid>
-        <description>雪泥鸿爪 https://www.lix23.com/posts/all-about-java-locks/ -&lt;p&gt;在面试中很容易遇到一些locks相关的问题，在这里做一些简单的总结，&lt;/p&gt;
-&lt;p&gt;在 Java 中，synchronized 和 Lock 都可以用来实现线程同步，但它们之间存在一些重要的区别：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;synchronized&lt;/li&gt;
-&lt;/ul&gt;
-&lt;ol&gt;
-&lt;li&gt;synchronized 是 Java 关键字，是 JVM 层面的实现。&lt;/li&gt;
-&lt;li&gt;synchronized 在代码执行完之后会自动释放锁，无需手动解锁。&lt;/li&gt;
-&lt;li&gt;synchronized 在获取不到锁时会进入阻塞状态，没有提供获取锁的超时时间设置。&lt;/li&gt;
-&lt;li&gt;synchronized 适合用于竞争不激烈，且可确保没有异常抛出或者错误发生导致无法释放锁的场景。&lt;/li&gt;
-&lt;/ol&gt;
-&lt;ul&gt;
-&lt;li&gt;Lock&lt;/li&gt;
-&lt;/ul&gt;
-&lt;ol&gt;
-&lt;li&gt;Lock 是一个 Java 接口，具体的实现如 ReentrantLock，是 JDK 层面的实现。&lt;/li&gt;
-&lt;li&gt;Lock 需要手动获取锁和释放锁，通常借助 try-finally 语句块来确保锁能够被释放。&lt;/li&gt;
-&lt;li&gt;Lock 提供了尝试获取锁的超时时间设置，可以避免因等待锁而导致的永久阻塞问题。&lt;/li&gt;
-&lt;li&gt;Lock 还提供了更多的灵活功能，例如，可以被中断的锁获取操作，锁获取的公平性和非公平性选择，以及多样化的条件对象（conditions）等。&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;总的来说，synchronized 和 Lock 都有它们各自适用的场景。synchronized 由于其简单和方便，适合用于锁竞争不激烈的场景。而 Lock 则适用于更复杂的线程同步场景，它提供了更高的灵活性和更强的功能。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;无锁队列&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Java的java.util.concurrent包 使用了无锁或者低锁的技术来实现了线程安全的队列：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;ConcurrentHashMap：这是一个线程安全的HashMap的实现。它使用了一种叫做分段锁的技术，将数据分成了多个段（segment），每个段可以独立地加锁，从而允许多线程并发地访问不同的段。在Java 8中，ConcurrentHashMap进一步改进，使用了更高效的CAS操作。&lt;/li&gt;
-&lt;li&gt;CopyOnWriteArrayList 和 CopyOnWriteArraySet：这两个类在进行修改操作（如add和remove）时，会创建底层数组的一个新的副本，然后在新的副本上进行修改。这样可以确保在读取数据时不需要加锁。这些类适合用在读操作远多于写操作的场景。&lt;/li&gt;
-&lt;li&gt;ConcurrentLinkedQueue 和 ConcurrentLinkedDeque：这两个类是无锁的并发队列。它们使用了一种叫做&amp;quot;compare-and-swap&amp;quot;（CAS）的技术来实现并发的修改操作。&lt;/li&gt;
-&lt;li&gt;ConcurrentSkipListMap 和 ConcurrentSkipListSet：这两个类是基于跳表的线程安全的有序集合。它们也使用了CAS操作来实现并发的修改操作。&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;需要注意的是，尽管这些类使用了无锁或者低锁的设计，但它们并非在所有情况下都比使用锁的集合类更快。选择使用哪种集合类，需要根据具体的应用场景和需求进行考虑。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;有锁队列&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Java的java.util.concurrent包也提供了一些使用锁的线程安全队列，这些队列通常使用内部锁（内置的synchronized锁或者显式的ReentrantLock）来保证多线程操作的原子性。以下是一些常见的有锁队列：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;ArrayBlockingQueue：一个由数组实现的有界阻塞队列。此队列按照 FIFO（先进先出）原则对元素进行排序。队列的头部是在队列中存在时间最长的元素，队列的尾部是存在时间最短的元素。新元素插入到队列的尾部，队列检索操作则是从队列头部开始获取元素。&lt;/li&gt;
-&lt;li&gt;LinkedBlockingQueue：一个由链表实现的可选容量（默认为Integer.MAX_VALUE）的阻塞队列。此队列按照 FIFO（先进先出）原则对元素进行排序。&lt;/li&gt;
-&lt;li&gt;PriorityBlockingQueue：一个具有优先级的无界阻塞队列。此队列中的元素按照其自然顺序进行排序，或者按照比较器（Comparator）所提供的顺序进行排序，具体取决于使用的构造函数。&lt;/li&gt;
-&lt;li&gt;SynchronousQueue：一个没有存储空间的阻塞队列，每一个put操作必须等待一个take操作，反之亦然。SynchronousQueue是一个内部只能包含一个元素的队列。它的内部实现是一个线程在插入数据时，它会被阻塞直到另一线程取走了数据，反之亦然。&lt;/li&gt;
-&lt;li&gt;LinkedTransferQueue：一个由链表实现的无界阻塞 TransferQueue。此队列按照 FIFO（先进先出）原则对元素进行排序。&lt;/li&gt;
-&lt;li&gt;DelayQueue：一个由PriorityQueue实现的、无界的阻塞队列，只有在延迟期满时才能从中提取元素。此队列的头部 是延迟期满后保存时间最长的 Delayed 元素。如果延迟还没有期满，则队列没有头部，并且 poll 将返回 null。&lt;/li&gt;
-&lt;/ol&gt;
-&lt;ul&gt;
-&lt;li&gt;乐观锁 与 悲观锁&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;悲观锁默认会遇到多线程并发更新场景，需要抢到锁之后再进行更新动作，而乐观锁会假定没有其他线程来进行竞争，此时会检查所要更新的值是否有变化，如果没有变化则直接update，无需抢锁，乐观锁的实现：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;单调递增的版本号，有改动则变动版本号；&lt;/li&gt;
-&lt;li&gt;采用类似CAS的方式，compare and set；&lt;/li&gt;
-&lt;/ol&gt;
-- https://www.lix23.com/posts/all-about-java-locks/ - all copyright reserve for lixin</description>
-        </item>
     
     
     
@@ -90,7 +27,7 @@
 &lt;li&gt;在元目录下执行如下命令来创建对应的博客帖子：hugo new posts/${post_name}.md ，用你喜欢的文件编辑器编辑相关帖子，使用 hugo server 命令来尝试在本地拉起这个网站，并可以通过浏览器来访问网站检查效果；&lt;/li&gt;
 &lt;li&gt;生成静态网站：当你添加了足够的内容后，在相应的目录下使用以下命令生成静态网站：hugo，这个命令会在 public 目录下生成生成静态网站，把生成的网站内容上传到github相应的repo下即可访问；&lt;/li&gt;
 &lt;/ol&gt;
-- https://www.lix23.com/posts/how-to-gen-website/ - all copyright reserve for lixin</description>
+- https://www.lix23.com/posts/how-to-gen-website/ - all copyright reserve for lixin xinli80@qq.com </description>
         </item>
     
     
@@ -102,7 +39,7 @@
         
         <guid>https://www.lix23.com/posts/my-very-first-post/</guid>
         <description>雪泥鸿爪 https://www.lix23.com/posts/my-very-first-post/ -&lt;p&gt;从蝶园搬出来到溪望差不多第三周了吧，so far so good，希望一切都在往好的方向发展，I think I need more time to shape myself, keep fighting!&lt;/p&gt;
-- https://www.lix23.com/posts/my-very-first-post/ - all copyright reserve for lixin</description>
+- https://www.lix23.com/posts/my-very-first-post/ - all copyright reserve for lixin xinli80@qq.com </description>
         </item>
     
     
