@@ -6,8 +6,26 @@
     <description>Recent content in Posts on 雪泥鸿爪</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <copyright>all copyright reserve for lixin xinli80@qq.com </copyright>
-    <lastBuildDate>Fri, 25 Aug 2023 13:08:35 +0800</lastBuildDate><atom:link href="https://www.lix23.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <copyright>all copyright reserved for lixin xinli80@qq.com </copyright>
+    <lastBuildDate>Sun, 17 Sep 2023 23:37:09 +0800</lastBuildDate><atom:link href="https://www.lix23.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Dnat Redirect Tproxy</title>
+      <link>https://www.lix23.com/posts/dnat-redirect-tproxy/</link>
+      <pubDate>Sun, 17 Sep 2023 23:37:09 +0800</pubDate>
+      
+      <guid>https://www.lix23.com/posts/dnat-redirect-tproxy/</guid>
+      <description>在kubernetes的Service实现中，默认是使用iptables来实现流量路由转发的，iptables 在使用过程中常见的target有DNAT，REDIRECT 以及 TPROXY，接下来我们来看看他们之间有何异同。
+1、DNAT DNAT 代表目标地址转换，是 Destination Network Address Translation 的缩写，在使用DNAT进行转发的场景中修改数据包的目标地址，它是一种低性能损耗的本地路由，一般被称为端口转发。
+实现原理是在路由规则生效之前修改数据包的目标IP地址或者端口；需要在此指出的是DNAT实际上修改了Ip数据包 header中的地址，并需要依赖内核中的connectin tracking来工作，这样回包也可以被匹配到，从而返回的数据包中相关地址也可以转换回来。
+例子：
+#将12.0.0.254:8080 转换成 192.168.72.10:80 iptables -t nat -A PREROUTING -i ens33 -d 12.0.0.254 -p tcp --dport 8080 -j DNAT --to 192.168.72.10:80 调用者实际上并不知道流量最终到了一个内部服务器，它只知道是与他通信的这个网关的地址，并得到了正确的response。
+TIP，DNAT场景下数据回包如何回到最初的调用者：
+在 Linux 网络栈中，DNAT（Destination Network Address Translation，目标网络地址转换）是通过 Connection Tracking（conntrack）系统来实现的。这是一种内核机制，用于追踪和记录网络连接的状态信息（如 TCP 流或 UDP 对话），以便在进行网络地址转换（NAT）时能正确地对数据包进行处理。
+当一个数据包首次到达网关时，如果该数据包匹配到某个 DNAT 规则，那么 conntrack 系统会在内核中创建一条新的连接追踪记录。这个记录会包含原始的源地址和目标地址（在进行 DNAT 之前的地址），以及转换后的源地址和目标地址（在进行 DNAT 之后的地址）。这个记录会一直存在，直到这个连接结束或超时。
+当来自服务器的响应数据包到达网关时，conntrack 系统会使用该数据包的源地址和目标地址（在进行 DNAT 之后的地址）来查找对应的连接追踪记录。如果找到了对应的记录，那么系统就会知道这个数据包是属于哪个连接的，以及在进行 DNAT 之前的源地址和目标地址是什么。然后，系统就可以将这个数据包的源地址和目标地址修改回原始的地址，然后将数据包发送回最初的调用者。
+因此，conntrack 系统是保障 DNAT 正常工作的关键。没有 conntrack 系统，网关就无法知道一个响应数据包应该发送给哪个客户端，</description>
+    </item>
+    
     <item>
       <title> 如何用hugo生成静态网站</title>
       <link>https://www.lix23.com/posts/how-to-gen-website/</link>
