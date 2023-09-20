@@ -19,36 +19,37 @@
         <pubDate>Sun, 17 Sep 2023 23:37:09 +0800</pubDate>
         
         <guid>https://www.lix23.com/posts/dnat-redirect-tproxy/</guid>
-        <description>雪泥鸿爪 https://www.lix23.com/posts/dnat-redirect-tproxy/ -&lt;p&gt;在kubernetes的Service实现中，默认是使用iptables来实现流量路由转发的，iptables 在使用过程中常见的target有DNAT，REDIRECT 以及 TPROXY，接下来我们来看看他们之间有何异同。&lt;/p&gt;
-&lt;h2 id=&#34;1dnat&#34;&gt;1、DNAT&lt;/h2&gt;
-&lt;p&gt;DNAT 代表目标地址转换，是 Destination Network Address Translation 的缩写，在使用DNAT进行转发的场景中修改数据包的目标地址，它是一种低性能损耗的本地路由，一般被称为端口转发。&lt;/p&gt;
-&lt;p&gt;实现原理是在路由规则生效之前修改数据包的目标IP地址或者端口；需要在此指出的是DNAT实际上修改了Ip数据包 header中的地址，并需要依赖内核中的connectin tracking来工作，这样回包也可以被匹配到，从而返回的数据包中相关地址也可以转换回来。&lt;/p&gt;
+        <description>雪泥鸿爪 https://www.lix23.com/posts/dnat-redirect-tproxy/ -&lt;p&gt;在kubernetes的Service实现中，默认是使用iptables来实现流量路由转发的，iptables 在使用过程中常见的目标（target）有DNAT，REDIRECT 以及 TPROXY，接下来我们看看这几个target之间的异同。&lt;/p&gt;
+&lt;h2 id=&#34;1dnat-模式&#34;&gt;1、DNAT 模式&lt;/h2&gt;
+&lt;p&gt;DNAT 是 Destination Network Address Translation 的缩写，含义是目标地址转换，在使用DNAT进行转发的场景中将会修改传输层数据包 header 中 的目标地址，它是一种低性能损耗的本地路由，一般被称为端口转发。&lt;/p&gt;
+&lt;p&gt;DNAT 实现原理是在路由规则生效之前修改数据包的目标IP地址或者端口；并需要依赖内核中的 connectin tracking 机制来工作；有了 connection tracking 回包才可以被匹配到，从而返回的数据包中相关地址也可以转换回来。&lt;/p&gt;
 &lt;p&gt;例子：&lt;/p&gt;
 &lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;#将12.0.0.254:8080 转换成 192.168.72.10:80
 iptables -t nat -A PREROUTING -i ens33 -d 12.0.0.254 -p tcp --dport 8080 -j DNAT --to 192.168.72.10:80
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;调用者实际上并不知道流量最终到了一个内部服务器，它只知道是与他通信的这个网关的地址，并得到了正确的response。&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;这条命令的作用是将 从ens33网卡过来，访问 12.0.0.254:8080 的tcp协议的数据包的目标地址改为 192.168.72.10:80。&lt;/p&gt;
+&lt;p&gt;调用者实际上并不知道流量最终被路由到了一个内部服务器，他只知道是与他通信的这个网关的地址，并且他的访问得到了正确的response。&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;TIP，DNAT场景下数据回包如何回到最初的调用者：&lt;/p&gt;
+&lt;p&gt;TIP DNAT模式下数据回包如何回到最初的调用者&lt;/p&gt;
 &lt;p&gt;在 Linux 网络栈中，DNAT（Destination Network Address Translation，目标网络地址转换）是通过 Connection Tracking（conntrack）系统来实现的。这是一种内核机制，用于追踪和记录网络连接的状态信息（如 TCP 流或 UDP 对话），以便在进行网络地址转换（NAT）时能正确地对数据包进行处理。&lt;/p&gt;
 &lt;p&gt;当一个数据包首次到达网关时，如果该数据包匹配到某个 DNAT 规则，那么 conntrack 系统会在内核中创建一条新的连接追踪记录。这个记录会包含原始的源地址和目标地址（在进行 DNAT 之前的地址），以及转换后的源地址和目标地址（在进行 DNAT 之后的地址）。这个记录会一直存在，直到这个连接结束或超时。&lt;/p&gt;
 &lt;p&gt;当来自服务器的响应数据包到达网关时，conntrack 系统会使用该数据包的源地址和目标地址（在进行 DNAT 之后的地址）来查找对应的连接追踪记录。如果找到了对应的记录，那么系统就会知道这个数据包是属于哪个连接的，以及在进行 DNAT 之前的源地址和目标地址是什么。然后，系统就可以将这个数据包的源地址和目标地址修改回原始的地址，然后将数据包发送回最初的调用者。&lt;/p&gt;
 &lt;p&gt;因此，conntrack 系统是保障 DNAT 正常工作的关键。没有 conntrack 系统，网关就无法知道一个响应数据包应该发送给哪个客户端，&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id=&#34;2-redirect&#34;&gt;2 、REDIRECT&lt;/h2&gt;
-&lt;p&gt;REDIRECT 可以被认为是一种特别的DNAT模式，数据包被转到本机的另一个端口，Ip header 也会被修改；&lt;/p&gt;
+&lt;h2 id=&#34;2-redirect-模式&#34;&gt;2 、REDIRECT 模式&lt;/h2&gt;
+&lt;p&gt;REDIRECT 可以被认为是一种特别的DNAT模式，数据包被转到本机的另一个端口，传输层数据包 header 中的地址也会被修改；&lt;/p&gt;
 &lt;p&gt;例子：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;iptables --table nat --append PREROUTING --protocol tcp --dport 80 --jump REDIRECT --to-ports 8080
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;相对于DNAT的区别是：REDIRECT不需要指定IP地址，只需要指定的端口； REDIRECT模式将流量转向本地的另一个socket端口，在这个场景中，服务端不需要知道调用者的存在，调用者知道被调用者的IP，但实际调用者并不知道数据包被转发到了另一个socket端口；&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;iptables --table nat --A PREROUTING --protocol tcp --dport 80 --jump REDIRECT --to-ports 8080
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;相对于DNAT的区别是：REDIRECT不需要指定目的IP地址，只能指定目的端口； REDIRECT模式将流量转向本地的另一个socket端口，在这个场景中，服务端不知道调用者的存在，调用者知道被调用者的IP，但调用者并不知道数据包被转发到了另一个socket端口；&lt;/p&gt;
 &lt;h2 id=&#34;3tproxy-透明代理模式&#34;&gt;3、TPROXY 透明代理模式&lt;/h2&gt;
-&lt;p&gt;DNAT 模式 与 REDIRECT 模式的一切操作都是在内核中完成，TPROXY 模式需要跑一个特别的软件来用于做proxy 代理，OS只需要“支持” 将数据包发送到这个proxy。&lt;/p&gt;
-&lt;p&gt;在执行 iptables 命令时 目标（Target）为 TPROXY 的情况下会将数据包在不修改传输层Header（IP）的基础上将数据转发至本地的一个套接字；并加上对应的Mark，然后
-再通过ip rule 以及 ip route的配合将数据包发送到；在这种场景下 proxy 所收到的数据包保留了原始的源地址以及目标地址；
+&lt;p&gt;DNAT 模式 与 REDIRECT 模式的一切路由操作都是在内核中完成，与这二者不同的是， TPROXY 模式是另一种工作模式。工作原理简单解释如下：
+在执行 iptables 命令时 目标（Target）为 TPROXY 的情况下会将数据包在不修改传输层Header（IP）的基础上将数据转发至本地的一个套接字；并加上对应的Mark，然后
+再通过ip rule 以及 ip route的配合对数据包再做进一步处理后发给一个透明代理；在这种场景下 proxy 所收到的数据包保留了原始的源地址以及目标地址；
 透明代理对于调用者client是透明的（不可见的），也就是说调用者client及调用者的os也无需其他配置；在这个场景中，网络参数都可以按照所需的进行设置而不影响proxy代理。
-一个TPROXY模式命令的例子如下：&lt;/p&gt;
+一个 TPROXY 模式的例子如下：&lt;/p&gt;
 &lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;iptables -t mangle -A PREROUTING -p tcp --dport 80 -j TPROXY --on-port 8080 --tproxy-mark 0x1/0x1
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;这条命令的作用是，将所有目标端口为 80 的 TCP 数据包转送到本地的 8080 端口，并将这些数据包的 &amp;ldquo;mark&amp;rdquo; 设置为 0x1（这个 &amp;ldquo;mark&amp;rdquo; 可以被 ip rule 或 ip route 使用）。
 TPROXY 模式与 REDIRECT 模式的区别，REDIRECT会修改传输层header，而 TPROXY 不会对数据包有任何修改，他只是将数据包parcket 转发出去（此处不是内核的数据包forward，只是socket之间的数据包copy）。在工作过程中也不需要connection tracking，数据包的最初的目标端口将作为链接套接字（connection socket）的本地端口。
-可以通过 ss &amp;ndash;tcp -numeric &amp;ndash;process &amp;ndash;listening 命令看到对应的TCP链接建立情况。&lt;/p&gt;
+可以在网关机器，以及最终的服务提供者机器上通过 ss &amp;ndash;tcp -numeric &amp;ndash;process &amp;ndash;listening 命令看到对应的TCP链接建立情况。&lt;/p&gt;
 &lt;p&gt;在实现透明代理时会将 socket 配置 IP_TRANSPARENT参数： 当我们将 IP_TRANSPARENT 设置为真（true）时，我们可以在一个套接字上接收到并发送任何本地或非本地的 IP 地址和端口的数据包。这对于实现透明代理很有用，因为它允许代理服务器接收并处理原本将发送到其他服务器的数据包。此功能不需要内核态的connection tracking 或者 ip forwarding。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;iptables 支持以下四种表（table）：&lt;/p&gt;
