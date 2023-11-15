@@ -14,13 +14,13 @@
       <pubDate>Tue, 14 Nov 2023 23:13:41 +0800</pubDate>
       
       <guid>https://www.lix23.com/posts/new-k8s-cluster/</guid>
-      <description>安装背景 自建Kubernetes集群是指在阿里云上购买ECS并从头开始来完成kubernetes集群的安装与配置；集群ECS规格采用的最小规格安装，2c4G的突发实例，操作系统是Anolis OS 8.8 RHCK 64位；使用kubeadm这个工具来进行安装，主要流程可抽象成两个大步骤： 1、初始化节点：通过rpm包管理工具安装kubectl、kubelet、kubeadm 这几个组件；安装containerd，并完成相关配置； 2、初始化集群：注意kubeadm的配置文件，生成证书等配置，建立高可用控制面，并将worker节点加入集群中；
-初始化节点 安装kubectl、kubeadm、kubelet 组件 考虑到网络联通性问题，需要加入rpm包的国内本地化配置源，首先是kubernetes的源：添加rpm源的配置如下所示，清注意关闭gpgcheck
-cat &amp;lt;&amp;lt; EOF |tee /etc/yum.repos.d/kubernetes.repo [kubernetes] name=Kubernetes baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/ enabled=1 gpgcheck=0 repo_gpgcheck=0 gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg EOF yum install kubectl kubeadm kubelet 不声明版本则安装具体的最新版； 安装 containerd contaienrd 配置
+      <description>安装背景 出于对于kubernetes集群的配置灵活性的需求，很多朋友有自建Kubernetes集群的诉求，在此记录一下我在阿里云上购买ECS并从头开始来完成kubernetes集群的过程；为节省成本集群中的节点采用了规格为2c4G的突发性能型ECS，操作系统是Anolis OS 8.8 RHCK 64位；使用kubeadm这个工具来进行安装，主要流程可抽象成两个大步骤：
+初始化节点：通过rpm包管理工具安装kubectl、kubelet、kubeadm 这几个组件；安装containerd，并完成相关配置； 初始化集群：注意kubeadm的配置文件，生成证书等配置，建立高可用控制面，并将worker节点加入集群中； 初始化节点 安装kubectl、kubeadm、kubelet 组件 考虑到网络联通性问题，需要加入rpm包的国内本地化配置源，首先是kubernetes的源：添加rpm源的配置如下所示，清注意关闭gpgcheck
+cat &amp;lt;&amp;lt; EOF |tee /etc/yum.repos.d/kubernetes.repo [kubernetes] name=Kubernetes baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/ enabled=1 gpgcheck=0 repo_gpgcheck=0 gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg EOF # 建议设定版本，不声明版本则安装具体的最新版； yum install kubectl kubeadm kubelet 安装 containerd contaienrd 配置
 参考 https://kubernetes.io/zh-cn/docs/setup/production-environment/container-runtimes/#containerd 来进行containerd的安装
 containerd 国内本地化源配置
 wget -O /etc/yum.repos.d/docker-ce.repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo 先验证contianerd包在源中存在，然后执行如下命令安装相关 containerd 运行时：
-yum install containerd.io systemctl enable containerd systemctl start containerd 修改containerd 中的 sandbox image配置： containerd config default &amp;gt; /etc/containerd/config.toml ，待相关配置文件生成以后，要 修改 sandbox image配置：registry.</description>
+yum install containerd.io systemctl enable containerd systemctl start containerd 修改 containerd 中的 sandbox image配置 修改 containerd 配置文件 config.toml文件中的 sandbox image配置：registry.aliyuncs.com/google_containers/pause:3.9 ，此修改是因为默认的镜像地址为gcr，在国内无法正常访问。</description>
     </item>
     
     <item>

@@ -20,9 +20,11 @@
         
         <guid>https://www.lix23.com/posts/new-k8s-cluster/</guid>
         <description>雪泥鸿爪 https://www.lix23.com/posts/new-k8s-cluster/ -&lt;h2 id=&#34;安装背景&#34;&gt;安装背景&lt;/h2&gt;
-&lt;p&gt;自建Kubernetes集群是指在阿里云上购买ECS并从头开始来完成kubernetes集群的安装与配置；集群ECS规格采用的最小规格安装，2c4G的突发实例，操作系统是Anolis OS 8.8 RHCK 64位；使用kubeadm这个工具来进行安装，主要流程可抽象成两个大步骤：
-1、初始化节点：通过rpm包管理工具安装kubectl、kubelet、kubeadm 这几个组件；安装containerd，并完成相关配置；
-2、初始化集群：注意kubeadm的配置文件，生成证书等配置，建立高可用控制面，并将worker节点加入集群中；&lt;/p&gt;
+&lt;p&gt;出于对于kubernetes集群的配置灵活性的需求，很多朋友有自建Kubernetes集群的诉求，在此记录一下我在阿里云上购买ECS并从头开始来完成kubernetes集群的过程；为节省成本集群中的节点采用了规格为2c4G的突发性能型ECS，操作系统是Anolis OS 8.8 RHCK 64位；使用kubeadm这个工具来进行安装，主要流程可抽象成两个大步骤：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;初始化节点：通过rpm包管理工具安装kubectl、kubelet、kubeadm 这几个组件；安装containerd，并完成相关配置；&lt;/li&gt;
+&lt;li&gt;初始化集群：注意kubeadm的配置文件，生成证书等配置，建立高可用控制面，并将worker节点加入集群中；&lt;/li&gt;
+&lt;/ol&gt;
 &lt;h2 id=&#34;初始化节点&#34;&gt;初始化节点&lt;/h2&gt;
 &lt;h3 id=&#34;安装kubectlkubeadmkubelet-组件&#34;&gt;安装kubectl、kubeadm、kubelet 组件&lt;/h3&gt;
 &lt;p&gt;考虑到网络联通性问题，需要加入rpm包的国内本地化配置源，首先是kubernetes的源：添加rpm源的配置如下所示，清注意关闭gpgcheck&lt;/p&gt;
@@ -35,7 +37,8 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;repo_gpgcheck=0
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;EOF&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;yum install kubectl kubeadm kubelet   不声明版本则安装具体的最新版；
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 建议设定版本，不声明版本则安装具体的最新版；&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;yum install kubectl kubeadm kubelet   
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;安装-containerd&#34;&gt;安装 containerd&lt;/h3&gt;
 &lt;p&gt;contaienrd 配置&lt;/p&gt;
 &lt;p&gt;参考 &lt;a href=&#34;https://kubernetes.io/zh-cn/docs/setup/production-environment/container-runtimes/#containerd&#34;&gt;https://kubernetes.io/zh-cn/docs/setup/production-environment/container-runtimes/#containerd&lt;/a&gt; 来进行containerd的安装&lt;/p&gt;
@@ -45,11 +48,18 @@
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  yum install containerd.io
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  systemctl enable containerd
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  systemctl start containerd
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;修改containerd-中的-sandbox-image配置&#34;&gt;修改containerd 中的 sandbox image配置：&lt;/h3&gt;
-&lt;p&gt;containerd config default &amp;gt; /etc/containerd/config.toml ，待相关配置文件生成以后，要 修改 sandbox image配置：registry.aliyuncs.com/google_containers/pause:3.9&lt;/p&gt;
-&lt;p&gt;配置修改后通过 systemctl restart containerd 命令重启生效配置，注意：&lt;/p&gt;
-&lt;p&gt;查看containerd当前生效配置：containerd config dump &amp;gt; 2.toml；
-如果containerd的工作状态不符合预期，可以通过 journalctl -xeu containerd 命令来查看containerd日志 ；&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;修改-containerd-中的-sandbox-image配置&#34;&gt;修改 containerd 中的 sandbox image配置&lt;/h3&gt;
+&lt;p&gt;修改 containerd 配置文件 config.toml文件中的 sandbox image配置：registry.aliyuncs.com/google_containers/pause:3.9 ，此修改是因为默认的镜像地址为gcr，在国内无法正常访问。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 生成对应containerd的配置文件&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;containerd config default &amp;gt; /etc/containerd/config.toml  
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 保存此配置文件后通过 命令重启生效配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;systemctl restart containerd 
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;注意：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;查看containerd当前生效配置：containerd config dump &amp;gt; 2.toml；&lt;/li&gt;
+&lt;li&gt;如果containerd的工作状态不符合预期，可以通过 journalctl -xeu containerd 命令来查看containerd日志 ；&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h3 id=&#34;添加-crictl配置&#34;&gt;添加 crictl配置&lt;/h3&gt;
 &lt;p&gt;相关配置文件为 /etc/crictl.yaml&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cat &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;lt;&amp;lt; EOF |tee /etc/crictl.yaml
@@ -62,11 +72,12 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;此时执行 crictl images 可以正常输出内容；&lt;/p&gt;
 &lt;h3 id=&#34;安装-并配置-cni-插件&#34;&gt;安装 并配置 cni 插件&lt;/h3&gt;
 &lt;p&gt;在 cni 界面 &lt;a href=&#34;https://github.com/containernetworking/plugins/releases&#34;&gt;https://github.com/containernetworking/plugins/releases&lt;/a&gt; ，找到 v1.3.0 或者v1.0.0 版本，通过wget命令下载此包。&lt;/p&gt;
-&lt;p&gt;通过命令创建cni的对应目录：mkdir -p /opt/cni/bin ，
-通过如下相关命令将包解压至相关目录： tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.3.0.tgz&lt;/p&gt;
-&lt;p&gt;本地cni配置，注意版本号以及相关ip子网地址段：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cat &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;lt;&amp;lt; EOF | tee /etc/cni/net.d/10-containerd-net.conflist
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 通过命令创建cni的对应目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;mkdir -p /opt/cni/bin
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 通过如下相关命令将包解压至相关目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.3.0.tgz
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;本地cni配置，注意版本号以及相关ip子网地址段：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cat &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;lt;&amp;lt; EOF | tee /etc/cni/net.d/10-containerd-net.conflist
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;{
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; &amp;#34;cniVersion&amp;#34;: &amp;#34;1.0.0&amp;#34;,
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; &amp;#34;name&amp;#34;: &amp;#34;containerd-net&amp;#34;,
@@ -121,16 +132,19 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sysctl 使相关配置生效
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sysctl -p /etc/sysctl.conf
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;集群初始化--加入master节点&#34;&gt;集群初始化&amp;ndash;加入master节点&lt;/h3&gt;
-&lt;p&gt;通过ssh登录一台预先规划好的master服务器，通过kubeadm 来完成节点初始化工作，注意给出config配置文件需要使用国内的镜像仓库；注意 &amp;ndash;apiserver-advertise-address 为相关master服务器的内网地址；&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;集群初始化--拉起控制面&#34;&gt;集群初始化&amp;ndash;拉起控制面&lt;/h3&gt;
+&lt;p&gt;控制面（control plane）采用三台服务器，etcd与api server同机部署的架构；通过ssh登录一台预先规划好的master服务器，通过kubeadm 来完成节点初始化工作，注意给出config配置文件需要使用国内阿里云的镜像仓库；&amp;ndash;apiserver-advertise-address 为此master服务器的内网地址；另外控制面的证书如果需要上传到集群请在 kubeadm init 执行时加上 &amp;ndash;upload-certs 这个参数。
+一般来说 kubeadm的init命令如下所示：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;kubeadm init &lt;span style=&#34;color:#ae81ff&#34;&gt;\
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;&lt;/span&gt;  --apiserver-advertise-address&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;192.168.0.121 &lt;span style=&#34;color:#ae81ff&#34;&gt;\
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;&lt;/span&gt;  --image-repository registry.aliyuncs.com/google&lt;span style=&#34;color:#ae81ff&#34;&gt;\_&lt;/span&gt;containers &lt;span style=&#34;color:#ae81ff&#34;&gt;\
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;&lt;/span&gt;  --kubernetes-version v1.28.2 &lt;span style=&#34;color:#ae81ff&#34;&gt;\
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;&lt;/span&gt;  --service-cidr&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;10.1.0.0/16 &lt;span style=&#34;color:#ae81ff&#34;&gt;\
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;&lt;/span&gt;  --pod-network-cidr&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;10.244.0.0/16
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  --config kubeadm.yaml
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;配置文件内容如下，注意certSANs中将三台master的hostname及ip地址都写入，此外还加入了api server对应LB的域名及ip地址：&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;但是为了更多配置项，我们选择配置文件的方式来进行init，具体命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;kubeadm init --config kubeadm-config.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;kubeadm 配置文件内容如下，certSANs配置中将三台master的hostname及ip地址都写入，此外还加入了api server对应LB的域名及ip地址；注意此处采用的是将etcd实例与api server 实例部署在同一node上的架构，如果是生产环境部署建议将etcd集群拆分部署在其他服务器上，如果是etcd拆分部署的情况，kubeadm配置文件的内容还会有所不同，具体请参照附录中的文件链接：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;apiServer&lt;/span&gt;:
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;certSANs&lt;/span&gt;:
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  - &lt;span style=&#34;color:#ae81ff&#34;&gt;api.k8s.local&lt;/span&gt;
@@ -162,8 +176,8 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;podSubnet&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;10.244.0.0&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;/16&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;serviceSubnet&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;10.96.0.0&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;/12&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;scheduler&lt;/span&gt;: {}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;注意在kubeadm init 执行过程中的日志输出，如果日志不够细的话还可以加入 &amp;ndash;v=10 参数并执行；&lt;/p&gt;
-&lt;p&gt;在其他两台master上，在完成节点初始化（本文第一部分）后，需要将相关kubernetes证书从最开始的master机器上拷贝出来：&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;请注意观察在kubeadm init 执行过程中的日志输出，错误日志会在此处给出详细信息，如果日志不够细致的话还可以加入 &amp;ndash;v=10 参数并执行；&lt;/p&gt;
+&lt;p&gt;在其他两台控制面机器上完成节点初始化（本文第一部分）后，如果在kubeadm init时没有选择加上 &amp;ndash;upload-certs 参数，则需要将相关kubernetes证书在控制面机器之间进行拷贝：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;scp /etc/kubernetes/pki/etcd/ca.key root@10.0.1.2:/etc/kubernetes/pki/etcd                                                                            
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;scp /etc/kubernetes/pki/etcd/ca.crt root@10.0.0.79:/etc/kubernetes/pki/etcd    
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;scp /etc/kubernetes/pki/front-proxy-ca.key root@10.0.0.79:/etc/kubernetes/pki 
@@ -174,28 +188,43 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;scp /etc/kubernetes/pki/ca.crt root@10.0.0.79:/etc/kubernetes/pki
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;通过如下命令将此节点作为一个master加入集群，注意参数 &amp;ndash;control-plane 这里说明是作为master进入的：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt; kubeadm join 10.0.3.105:6443 --token svy3br.1hcjfw953q23ypq3 --discovery-token-ca-cert-hash sha256:032c441fac7307da1867fab25ab77f480318c3ca68fb67977cd8011c3a4aab88 --control-plane
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;高可用集群控制面的两个问题：
-1、需要提前完成证书在master实例节点之间的copy；
-2、需要申请一个SLB将流量转发到多个api server 实例上，在 controlPlaneEndpoint 上体现了这个SLB的对应配置。&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;高可用集群控制面的两个问题：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;如果证书没有选择上传集群，则需要提前手动完成证书在master实例节点之间的copy；&lt;/li&gt;
+&lt;li&gt;需要申请一个SLB将流量转发到多个api server 实例上，在 controlPlaneEndpoint 上体现了这个SLB的对应配置。&lt;/li&gt;
+&lt;/ol&gt;
 &lt;h3 id=&#34;加入worker节点&#34;&gt;加入worker节点&lt;/h3&gt;
-&lt;p&gt;此刻可以说是完成了控制面 节点的搭建；通过如下命令将worker节点加入集群，注意worker节点并不需要提前scp证书，并且不需要 control-plane 参数；如果执行时日志中有 token 过期相关错误，需要登录到最初的master节点上，通过kubeadm token create创建一个新的token,并在&amp;ndash;token 处使用新的token。&lt;/p&gt;
+&lt;p&gt;此刻可以说是完成了控制面的搭建；通过如下命令将worker节点加入集群，注意worker节点并不需要提前scp证书，并且不需要 control-plane 参数；如果执行时日志中有 token 过期相关错误，需要登录到最初的master节点上，通过kubeadm token create创建一个新的token,并在&amp;ndash;token 处使用新的token。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  kubeadm join 10.0.3.105:6443 --token svy3br.1hcjfw953q23ypq3 --discovery-token-ca-cert-hash sha256:032c441fac7307da1867fab25ab77f480318c3ca68fb67977cd8011c3a4aab88 --v&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;10&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;master节点的添加及一些注意事项&#34;&gt;master节点的添加及一些注意事项&lt;/h3&gt;
-&lt;p&gt;如果需要新增master节点，需要在kubeadm配置文件中加入相关ip及dns配置，并通过如下kubeadm init phase命令重新生成相关的api server证书；&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  kubeadm init phase certs apiserver --config kubeadm.yaml 
+&lt;p&gt;如果需要新增控制面节点机器，需要在kubeadm配置文件中加入相关ip及dns配置，并通过如下kubeadm init phase命令重新生成相关的api server证书；&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#75715e&#34;&gt;# 新加入控制面机器，如果证书中没有包括相关机器的hostname及ip，需要重新生成对应的api server证书 &lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  kubeadm init phase certs apiserver --config kubeadm.yaml 
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#75715e&#34;&gt;# 重新生成cluster-info：&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  kubeadm init phase bootstrap-token
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id=&#34;discovery-token-ca-cert-hash-对应的值可以通过如下命令获取&#34;&gt;discovery-token-ca-cert-hash 对应的值可以通过如下命令获取：&lt;/h4&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;此时已完成自建kubernetes集群的初步搭建，对于集群中跨node的通信需求，推荐安装Calico来解决；&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;h3 id=&#34;安装过程中参考了如下文档中的描述&#34;&gt;安装过程中参考了如下文档中的描述：&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;如果要使用外部etcd，请参考如下文档中的创建步骤：https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/high-availability/#%E5%A4%96%E9%83%A8-etcd-%E8%8A%82%E7%82%B9&lt;/li&gt;
+&lt;li&gt;参考安装流程：https://cloud.tencent.com/developer/article/1706627&lt;/li&gt;
+&lt;li&gt;控制面高可用： &lt;a href=&#34;https://zhangguanzhang.github.io/2019/03/11/k8s-ha/#/vip-%E5%8D%95%E7%82%B9%E7%9A%84%E5%9D%91%E4%B9%8B-%E2%80%93advertise-address&#34;&gt;https://zhangguanzhang.github.io/2019/03/11/k8s-ha/#/vip-%E5%8D%95%E7%82%B9%E7%9A%84%E5%9D%91%E4%B9%8B-%E2%80%93advertise-address&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;安装 &lt;a href=&#34;https://cloud.tencent.com/developer/article/2145554&#34;&gt;https://cloud.tencent.com/developer/article/2145554&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;containerd &lt;a href=&#34;https://cloud.tencent.com/developer/article/2145554&#34;&gt;https://cloud.tencent.com/developer/article/2145554&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;containerd 设置文档 包含了cni &lt;a href=&#34;https://github.com/containerd/containerd/blob/main/docs/getting-started.md&#34;&gt;https://github.com/containerd/containerd/blob/main/docs/getting-started.md&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;国内环境安装 &lt;a href=&#34;https://zhuanlan.zhihu.com/p/46341911&#34;&gt;https://zhuanlan.zhihu.com/p/46341911&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;cni插件配置，参考相关文档，解决可能遇到的版本不匹配的问题：https://kubernetes.io/zh-cn/docs/tasks/administer-cluster/migrating-from-dockershim/troubleshooting-cni-plugin-related-errors/#updating-your-cni-plugins-and-cni-config-files&lt;/li&gt;
+&lt;li&gt;加入master节点之前，需要手动分发证书：参考 &lt;a href=&#34;https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/high-availability/#manual-certs&#34;&gt;https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/high-availability/#manual-certs&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;完成apiserver 证书的检查工作，并更新相关证书更新，并重新生成kube-system中的cluster-info configmap对象：参考：https://cloud.tencent.com/developer/article/1824860&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;kubeadm-join命令中的-discovery-token-ca-cert-hash-对应的值可以通过如下命令获取&#34;&gt;kubeadm join命令中的 discovery-token-ca-cert-hash 对应的值可以通过如下命令获取：&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2&amp;gt;/dev/null | &lt;span style=&#34;color:#ae81ff&#34;&gt;\
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;&lt;/span&gt;   openssl dgst -sha256 -hex | sed &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;s/^.* //&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id=&#34;证书相关一些命令备忘&#34;&gt;证书相关一些命令备忘：&lt;/h4&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;证书相关一些命令备忘&#34;&gt;证书相关一些命令备忘：&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 查看证书内容：&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;openssl x509 -in apiserver.crt -text -noout
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 将新master的IP地址更新入证书的另一种做法：&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
@@ -210,19 +239,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;&lt;/span&gt;    -keyout apiserver.key &lt;span style=&#34;color:#ae81ff&#34;&gt;\
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;&lt;/span&gt;    -out apiserver.crt &lt;span style=&#34;color:#ae81ff&#34;&gt;\
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;&lt;/span&gt;    -extensions SAN -config &amp;lt;&lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[req]&amp;#34;&lt;/span&gt;; echo distinguished_name&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;req; echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[SAN]&amp;#34;&lt;/span&gt;; echo subjectAltName&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local,DNS:master3105,IP:10.96.0.1,IP:10.0.3.105,IP:10.0.4.212&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;此时已完成相关集群的搭建，对于跨node的通信需求，推荐安装Calico来解决；&lt;/p&gt;
-&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
-&lt;p&gt;参考安装流程：https://cloud.tencent.com/developer/article/1706627&lt;/p&gt;
-&lt;p&gt;高可用 &lt;a href=&#34;https://zhangguanzhang.github.io/2019/03/11/k8s-ha/#/vip-%E5%8D%95%E7%82%B9%E7%9A%84%E5%9D%91%E4%B9%8B-%E2%80%93advertise-address&#34;&gt;https://zhangguanzhang.github.io/2019/03/11/k8s-ha/#/vip-%E5%8D%95%E7%82%B9%E7%9A%84%E5%9D%91%E4%B9%8B-%E2%80%93advertise-address&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;安装 &lt;a href=&#34;https://cloud.tencent.com/developer/article/2145554&#34;&gt;https://cloud.tencent.com/developer/article/2145554&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;containerd &lt;a href=&#34;https://cloud.tencent.com/developer/article/2145554&#34;&gt;https://cloud.tencent.com/developer/article/2145554&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;containerd 设置文档 包含了cni &lt;a href=&#34;https://github.com/containerd/containerd/blob/main/docs/getting-started.md&#34;&gt;https://github.com/containerd/containerd/blob/main/docs/getting-started.md&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;国内环境安装 &lt;a href=&#34;https://zhuanlan.zhihu.com/p/46341911&#34;&gt;https://zhuanlan.zhihu.com/p/46341911&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;cni插件配置，参考相关文档，解决可能遇到的版本不匹配的问题：https://kubernetes.io/zh-cn/docs/tasks/administer-cluster/migrating-from-dockershim/troubleshooting-cni-plugin-related-errors/#updating-your-cni-plugins-and-cni-config-files&lt;/p&gt;
-&lt;p&gt;加入master节点之前，需要手动分发证书：参考
-&lt;a href=&#34;https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/high-availability/#manual-certs&#34;&gt;https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/high-availability/#manual-certs&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;完成apiserver 证书的检查工作，并更新相关证书更新，并重新生成kube-system中的cluster-info configmap对象：参考：https://cloud.tencent.com/developer/article/1824860&lt;/p&gt;
-- https://www.lix23.com/posts/new-k8s-cluster/ - all copyright reserved for lixin xinli80@qq.com </description>
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;- https://www.lix23.com/posts/new-k8s-cluster/ - all copyright reserved for lixin xinli80@qq.com </description>
         </item>
     
     
